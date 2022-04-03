@@ -1,4 +1,14 @@
 
+" default plugin directory '~/.vim/plugged' can be passed in as arg
+call plug#begin()
+Plug 'ctrlpvim/ctrlp.vim' 
+Plug 'pangloss/vim-javascript'
+Plug 'leafgarland/typescript-vim'
+Plug 'peitalin/vim-jsx-typescript'
+Plug 'vim-syntastic/syntastic'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+call plug#end()
+
 
 " let g:javascript_plugin_jsdoc = 1
 " let g:typescript_indent_disable = 1
@@ -22,4 +32,5 @@ set smartindent
 set shiftwidth=4
 
 " setlocal indentkeys+=0
+
 
