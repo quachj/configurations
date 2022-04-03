@@ -45,3 +45,9 @@ git clone <the-plugin.git> ~/.vim/pack/plugins/start/the-plugin
 ```
 
 to update run git pull and to delete just delete the folder.
+
+to install help tags run:
+
+```
+:helptags ~/.vim/pack/plugins/start/the-plugin
+```
