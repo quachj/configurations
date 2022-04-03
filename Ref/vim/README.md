@@ -51,3 +51,34 @@ to install help tags run:
 ```
 :helptags ~/.vim/pack/plugins/start/the-plugin
 ```
+
+#### Manual Managing with git submodules
+
+
+store .gitmodule in a repository. Like storing dot config files in a bare git repository. Look at the other README. 
+
+```
+mkdir ~/vim_config
+cd ~/vim_config
+git submodule init
+git submodule add <the-plugin.git> ~/.vim/pack/plugins/start/the-plugin
+git add .gitmodules ~/.vim/pack/plugins/start/the-plugin
+git commit -m "add the plugin for vim"
+```
+
+#### updating packages
+
+```
+git submodule update --remote --merge
+git commit -m "updating the plugin for vim"
+
+
+#### removing the plugin package
+
+```
+git submodule deinit ~/.vim/pack/plugins/start/the-plugin
+git rm ~/.vim/pack/plugins/start/the-plugin
+rm -Rf .git/modules/vim/pack/plugins/start/the-plugin
+git commit -m "removing plugin"
+```
+```
