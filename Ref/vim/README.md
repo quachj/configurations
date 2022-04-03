@@ -66,6 +66,14 @@ git add .gitmodules ~/.vim/pack/plugins/start/the-plugin
 git commit -m "add the plugin for vim"
 ```
 
+#### optional packages in vim
+
+add the package to the ~/.vim/pack/plugins/opt folder
+
+```
+:packadd packagename
+```
+
 #### updating packages
 
 ```
@@ -82,3 +90,16 @@ rm -Rf .git/modules/vim/pack/plugins/start/the-plugin
 git commit -m "removing plugin"
 ```
 ```
+
+
+## Reference
+
+#### Quick Fix window (vim 7+)
+
+:copen " Open the quickfix window
+:ccl   " Close it
+:cw    " Open it if there are "errors", close it otherwise (some people prefer this)
+:cn    " Go to the next error in the window
+:cp    " Go to the previous error in the window
+:cnf   " Go to the first error in the next file
+:.cc   " Go to error under cursor (if cursor is in quickfix window)
