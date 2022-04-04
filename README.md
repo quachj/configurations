@@ -1,19 +1,27 @@
-## Setup to store config files in bare repository
+## Repository setup to store config files in a bare git repository
 
 ```
 git init --bare $HOME/.cfg
 ```
 
-create alias for git command with appropriate working directory (which would be $HOME) and path to git directory
+Create alias for git command with appropriate working directory (which would be $HOME) and path to git directory.
 
-with the alias we do not need to be in working directory and we can use the created alias in any directory.
-
-config git for the repository to not show untracked files to make it easier to manage.
-
-add remote tracking branch and push
+Alias is created, which is configured in $HOME/.zsh/aliases, so we do not need to be in the working directory to run git commands. We can use the ```config``` alias to run git on the repository in any directory.
 
 ```
-config remote add origin <remote url>
+alias config='/usr/bin/git --git-dir=/Users/johnquach/.cfg/ --work-tree=/Users/johnquach'
+```
+
+Config git for the repository to not show untracked files to make it easier to manage.
+
+```
+config config --local status.showUntrackedFiles no
+```
+
+Add remote tracking branch and push.
+
+```
+config remote add origin git@github.com:quachj/configurations.git
 config push
 ```
 
@@ -29,10 +37,10 @@ echo .cfg >> .gitignore
 ```
 
 
-Add a --bare flat if you wish you use a bare repo
+clone and add a --bare create a bare repo
 
 ```
-git clone <remote-git-repo-url> $HOME/.cfg
+git clone --bare git@github.com:quachj/configurations.git $HOME/.cfg
 ```
 
 

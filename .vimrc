@@ -26,7 +26,9 @@ command! -bar -nargs=1 SubstBrackets
 
 " custom key mappings
  
-nnoremap <silent> ct :tabclose  " close tab <number> <enter> in normal vim mode
+" this close tab with N doesn't work very good. can't think of a good way to
+" do this.
+" nnoremap <silent> ct :tabclose  " close tab <number> <enter> in normal vim mode
 " leader usually default is \ (:help leader) comma is a good leader
 nnoremap <leader>cd :cd %:p:h<CR>:pwd<CR>  " change directory to the file being edited
 nnoremap <leader>c <c-^>:bdelete #
