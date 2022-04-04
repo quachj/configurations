@@ -1,1 +1,2 @@
 alias config='/usr/bin/git --git-dir=/Users/johnquach/.cfg/ --work-tree=/Users/johnquach'
+alias vi=vim
