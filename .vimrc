@@ -6,8 +6,29 @@ function! SubstBrackets(word)
 	execute '%s/'.pattern.'/\1{\2}/eg'
 endfunction
 
-command! -bar -nargs=1 SubstBrackets
-  \ call SubstBrackets(<q-args>)
+" note: absolute paths do not work for external grep command.
+" todo: maybe look at switching to use find.
+" use vimgrep is slower
+function! FindUsingGrep(match)
+
+	let match_re = '\V'.escape(a:match, '/\')
+	let pattern = '\v<('.match_re.'\v)\((.{-})\)'
+ 
+	execute " grep! -srnw --binary-files=without-match "
+	 			\ . "--exclude-dir=node_modules "
+				\ . "--exclude-dir=node_modules "
+				\ . a:match . " "
+				\ . expand("#:p:h") . "/*"
+endfunction
+
+function! FindUsingVimGrep(match)
+
+	let match_re = '\V'.escape(a:match, '/\')
+	let pattern = '\v<('.match_re.'\v)\((.{-})\)'
+ 
+	" uses wildignore configuration to exclude directories
+    execute " vimgrep /" . escape(a:match,'/\') . "/j **"
+endfunction
 
 " nnoremap <C-r> :bufdo bdelete<cr>
 " nnoremap <silent> ;subst :call SubstBrackets(
@@ -18,20 +39,65 @@ command! -bar -nargs=1 SubstBrackets
 " " nnoremap yy yypkkyyp
 " "" End Notes
  
+function ClearQuickfixList()
+  call setqflist([])
+endfunction
 
 " """"""""""""""""""""""
 " my vim settings      "
 " """"""""""""""""""""""
 
+" :Sch {pattern}
+command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
+command! ClearQuickfixList cexpr[] "call ClearQuickfixList()
 
-" custom key mappings
+command! -bar -nargs=1 SubstBrackets
+  \ call SubstBrackets(<q-args>)
+
+command! -bar -nargs=1 FindUsingGrep 
+  \ call FindUsingGrep(<q-args>) | cw
+
+command! -bar -nargs=1 FindUsingVimGrep
+  \ call FindUsingVimGrep(<q-args>) 
+
+
+
+" eliminate the extra log output dump for grep and lgrep and go directly to
+" quickfix window
+" cnoreabbrev <expr> grep  (getcmdtype() ==# ':' && getcmdline() =~# '^grep')  ? 'silent grep'  : 'grep'
+" cnoreabbrev <expr> lgrep (getcmdtype() ==# ':' && getcmdline() =~# '^lgrep') ? 'silent lgrep' : 'lgrep'
+"augroup init_quickfix
+"  autocmd!
+"  autocmd QuickFixCmdPost [^l]* cwindow
+"  autocmd QuickFixCmdPost l* lwindow
+"augroup END
+
+
+" Custom Key Mappings
  
-" this close tab with N doesn't work very good. can't think of a good way to
-" do this.
-" nnoremap <silent> ct :tabclose  " close tab <number> <enter> in normal vim mode
+" this close tab with N doesn't work very good. can't think of a good way to do this.
+" close tab <number> <enter> in normal vim mode
+" nnoremap <silent> ct :tabclose  
 " leader usually default is \ (:help leader) comma is a good leader
-nnoremap <leader>cd :cd %:p:h<CR>:pwd<CR>  " change directory to the file being edited
-nnoremap <leader>c <c-^>:bdelete #
+let mapleader=","
+set timeoutlen=2000
+"let mapleader="\<Space>"
+noremap <leader>cf :ClearQuickfixList<CR>
+noremap <Leader>W :w !sudo tee % > /dev/null
+" change directory to the file being edited
+nnoremap <leader>cd :cd %:p:h<CR>:pwd<CR>  
+" nnoremap <leader>c <c-^>:bdelete #
+" delete all buffers except this one
+" nnoremap <leader>bc :%bd|e#<CR> 
+
+nnoremap <leader>f :call FindUsingGrep(
+			\ input('find? ', '' . expand('<cword>') ))<CR>
+nnoremap <leader>g :call FindUsingVimGrep(
+			\ input('find? ', '' .expand('<cword>') ))<CR>
+
+"map <F4> :execute "vimgrep /" . expand("<cword>") . "/j **" <Bar> cw<CR>
+map <F4> :execute " grep -srnw --binary-files=without-match --exclude-dir={.git,node_modules} . -e " . expand("<cword>") . " " <bar> cwindow<CR>
+
 
 " default plugin directory '~/.vim/plugged' can be passed in as arg
 call plug#begin()
@@ -44,23 +110,35 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-commentary'
 call plug#end()
 
+" VIM CONFIGURATIONS & SETTINGS
+
 set mouse=a
 set showcmd " show commands bottom right corner
-" set ignorecase
-set smartcase
+set ignorecase
+" set smartcase
+" for vimgrep exclude folders
+" set wildignore+=objd/**,obj/**,*.tmp,test.c,node_modules/,bin/**
+" set wildignore+=node_modules,*.lock
+set wildignore=*/node_modules/*,*/target/*,*/tmp/*,*/.git/*
+
+" change vimgrep to search only files that are tracked by git
+"noautocmd vimgrep /{pattern}/gj `git ls-files`
+
+" PLUGIN CONFIGURATION & SETTINGS
 
 let g:netrw_banner = 0
 let g:netrw_liststyle = 3
-let g:netrw_browse_split = 3
+let g:netrw_browse_split = 0
 let g:netrw_list_hide='.*\.swp$'
 
-let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git'
+let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git\|\.*\'
 
 " let g:javascript_plugin_jsdoc = 1
 " let g:typescript_indent_disable = 1
 let g:typescript_compiler_binary = 'tsc'
 let g:typescript_compiler_options = '--lib es6'
 
+" in a tsx file :make will run tsc transpiler and show errors in quickfix window
 autocmd FileType typescript :set makeprg=tsc
 autocmd QuickFixCmdPost [^l]* nested cwindow
 autocmd QuickFixCmdPost    l* nested lwindow
@@ -86,7 +164,7 @@ set number
 " :help statusline
 set laststatus=1
 " # show full file path
-set statusline+=%F
+set statusline=%f " %F
 
 " ###################
 " ## vim references##
@@ -157,8 +235,14 @@ set statusline+=%F
 " :e #
 " {count}CTRL-^ # edit nth file in buffer list equivelent to :e #[count]
 "
+" #### open file in previous buffer use <shift-P>
+"
 " ## buffers
 " :bwipeout (:bw)
+" :edit <file>
+" :enew | vnew | new
+" :badd <file>
+" 
 "
 " ## windows
 " CTRL-W_x " exchange window 
